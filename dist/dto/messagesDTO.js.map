@@ -1,0 +1,1 @@
+{"version":3,"file":"messagesDTO.js","sourceRoot":"","sources":["../../src/dto/messagesDTO.ts"],"names":[],"mappings":";;;AAEA,MAAa,aAAa;IAEtB,YAAY,QAAuB;QAC/B,IAAI,CAAC,QAAQ,GAAG,QAAQ,CAAC,GAAG,CAAC,GAAG,CAAC,EAAE;YAC/B,uCACO,GAAG,KACN,SAAS,EAAE,KAAK,EAChB,cAAc,EAAE,IAAI,IACvB;QACL,CAAC,CAAC,CAAA;IACN,CAAC;CACJ;AAXD,sCAWC"}

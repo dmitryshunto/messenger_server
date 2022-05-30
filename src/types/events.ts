@@ -1,0 +1,1 @@
+export type EmitEventTypes = 'onlineUsers' | 'userConnected' | 'userDisconnected' | 'message' | 'messageRead' | 'chatCreated'
