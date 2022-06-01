@@ -23,6 +23,7 @@ const io = new socket_io_1.Server(server, {
 exports.default = new webSocket_1.WebSocketService(io);
 app.use(express_1.default.json());
 app.use((0, cookie_parser_1.default)());
+app.use('/uploads', express_1.default.static(config_1.pathToUploads));
 app.use((0, cors_1.default)({
     credentials: true,
     origin: config_1.CLIENT_URL

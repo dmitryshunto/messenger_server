@@ -35,3 +35,7 @@ export const tableNames = {
 }
 
 export const MESSAGE_PORION_SIZE = 3
+
+export const uploadsFolder = 'uploads'
+
+export const pathToUploads = `src/${uploadsFolder}`

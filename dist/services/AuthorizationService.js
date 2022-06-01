@@ -44,9 +44,12 @@ class AuthService extends BaseService_1.BaseService {
                     return res.status(400).json({ message: "The user with the same email already exists!" });
                 const hash = yield bcrypt_1.default.hash(password, 5);
                 const activationLink = (0, uuid_1.v4)();
+                let photoUrl = null;
+                if (req.data && req.data.photoUrl)
+                    photoUrl = req.data.photoUrl;
                 const userRegistartionData = {
                     login, firstName, lastName, email, activationLink,
-                    password: hash
+                    password: hash, photoUrl
                 };
                 yield connection.query(`INSERT INTO ${config_1.tableNames['user']} SET ?`, userRegistartionData);
                 let [user] = yield this.findItems(config_1.tableNames['user'], 'login', login);

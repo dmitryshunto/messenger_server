@@ -3,7 +3,11 @@ import {JwtPayload} from 'jsonwebtoken'
 import { UserAuthorizationData, UserRegistrationData } from "./users"
 import { Request } from "express"
 
-export type CreateUserRequest = RequestType<any, UserRegistrationData, {}, string | JwtPayload>
+type UserAvatarURL = {
+    photoUrl?: string
+}
+
+export type CreateUserRequest = RequestType<any, UserRegistrationData, {}, UserAvatarURL>
 
 export type AuthorizeUserRequest = RequestType<any, UserAuthorizationData, {}, string | JwtPayload>
 

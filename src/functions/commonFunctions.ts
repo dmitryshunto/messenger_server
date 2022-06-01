@@ -1,3 +1,5 @@
+import path from 'path'
+import { pathToUploads, SERVER_URL, uploadsFolder } from '../config';
 function onlyUnique<D>(value: D, index: number, array: D[]) {
     return array.indexOf(value) === index;
 }
@@ -20,4 +22,10 @@ export const getChatNameFromUserLogins = (logins: string[], userLogin: string) =
         else chatName += `${logins[index]}`
     }
     return logins.length > 4 ? `${chatName}...` : chatName
+}
+
+export const getPathToUserFolder = (login: string) => path.join(pathToUploads, login)
+
+export const getUserAvatarUrl = (login: string, fileName: string) => {
+    return path.join(uploadsFolder, login, fileName)
 }

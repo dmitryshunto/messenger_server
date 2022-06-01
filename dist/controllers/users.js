@@ -14,9 +14,43 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const AuthorizationService_1 = __importDefault(require("../services/AuthorizationService"));
 const express_validator_1 = require("express-validator");
+const multer_1 = __importDefault(require("multer"));
+const fs_1 = __importDefault(require("fs"));
+const commonFunctions_1 = require("../functions/commonFunctions");
+const path_1 = __importDefault(require("path"));
+const storage = multer_1.default.diskStorage({
+    destination: (req, file, next) => {
+        const login = req.body.login;
+        if (login) {
+            const userFolderPath = (0, commonFunctions_1.getPathToUserFolder)(login);
+            if (!fs_1.default.existsSync(userFolderPath)) {
+                fs_1.default.mkdirSync(userFolderPath);
+            }
+            next(null, userFolderPath);
+        }
+        else {
+            next(new Error('Invalid user login!'), null);
+        }
+    },
+    filename: (req, file, next) => {
+        const login = req.body.login;
+        const fileName = Date.now() + path_1.default.extname(file.originalname);
+        req.data = {
+            photoUrl: (0, commonFunctions_1.getUserAvatarUrl)(login, fileName)
+        };
+        next(null, fileName);
+    }
+});
+const upload = (0, multer_1.default)({
+    storage,
+    limits: {
+        fileSize: 1 * 1024 * 1024
+    }
+});
 const userHandler = (router) => {
     const routes = router();
     routes.post('/create', [
+        upload.single('avatar'),
         (0, express_validator_1.body)(['login', 'firstName', 'lastName', 'email'], 'Field cannot be empty').notEmpty(),
         (0, express_validator_1.body)('email', 'Incorrect email').isEmail(),
         (0, express_validator_1.body)('password', 'The password must contain at least one number character, one lowercase letter, one uppercase letter, and must be more than 8 characters')

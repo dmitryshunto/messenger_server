@@ -39,9 +39,11 @@ class AuthService extends BaseService {
 
             const hash = await bcrypt.hash(password, 5)
             const activationLink = v4()
+            let photoUrl = null
+            if(req.data && req.data.photoUrl)  photoUrl = req.data.photoUrl
             const userRegistartionData = {
                 login, firstName, lastName, email, activationLink,
-                password: hash
+                password: hash, photoUrl
             }
             await connection.query(`INSERT INTO ${tableNames['user']} SET ?`, userRegistartionData)
 

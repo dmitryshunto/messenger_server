@@ -5,7 +5,7 @@ import { BaseService } from "./BaseService";
 import { Response } from 'express'
 import { ResultSetHeader, RowDataPacket } from "mysql2";
 import { UserData } from "../types/users";
-import { getArrayUniqueElements, getChatNameFromUserLogins } from './../commonFunctions';
+import { getArrayUniqueElements, getChatNameFromUserLogins } from '../functions/commonFunctions';
 import { BaseMessageData, ChatData, ChatMember, ChatNewMessageInfo, ChatType, GetMessagesResponse, MembersData, MessageType, StartingPrivateChatInfo } from "../types/chats";
 import { TokenPayload } from "../types/tokens";
 import messageSevice from "./MessagesService";

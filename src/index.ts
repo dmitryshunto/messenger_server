@@ -3,7 +3,7 @@ import inject from 'require-all'
 import bodyParser from 'body-parser'
 import cookieParser from 'cookie-parser'
 import cors from 'cors'
-import { CLIENT_URL, HOST_PORT } from './config'
+import { CLIENT_URL, HOST_PORT, pathToUploads } from './config'
 import http from 'http'
 import { WebSocketService } from './webSocketServer/webSocket'
 import { Server } from 'socket.io'
@@ -22,6 +22,7 @@ export default new WebSocketService(io)
 
 app.use(express.json())
 app.use(cookieParser())
+app.use('/uploads', express.static(pathToUploads))
 app.use(cors({
     credentials: true,
     origin: CLIENT_URL

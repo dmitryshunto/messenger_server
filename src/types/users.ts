@@ -21,6 +21,7 @@ export interface AdditionalUserData extends BaseUserData {
     id: number
     isActivated: boolean
     createdAt: string
+    
     photoUrl: string | null
 }
 
