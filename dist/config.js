@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.pathToUploads = exports.uploadsFolder = exports.MESSAGE_PORION_SIZE = exports.tableNames = exports.serverError = exports.notAuthMsg = exports.refreshTokenCookieName = exports.CLIENT_URL = exports.SERVER_URL = exports.APP_PASSWORD = exports.SMTP_PASSWORD = exports.SMTP_USER = exports.SMTP_PORT = exports.SMTP_HOST = exports.JWT_REFRESH_SECRET = exports.JWT_ACCESS_SECRET = exports.port = exports.db_name = exports.database = exports.HOST_PORT = exports.host = exports.password = exports.user = void 0;
+exports.avatarFormFieldName = exports.pathToUploads = exports.uploadsFolder = exports.MESSAGE_PORION_SIZE = exports.tableNames = exports.serverError = exports.notAuthMsg = exports.refreshTokenCookieName = exports.CLIENT_URL = exports.SERVER_URL = exports.APP_PASSWORD = exports.SMTP_PASSWORD = exports.SMTP_USER = exports.SMTP_PORT = exports.SMTP_HOST = exports.JWT_REFRESH_SECRET = exports.JWT_ACCESS_SECRET = exports.port = exports.db_name = exports.database = exports.HOST_PORT = exports.host = exports.password = exports.user = void 0;
 exports.user = 'dmitry';
 exports.password = 'dmitry';
 exports.host = 'localhost';
@@ -31,4 +31,5 @@ exports.tableNames = {
 exports.MESSAGE_PORION_SIZE = 3;
 exports.uploadsFolder = 'uploads';
 exports.pathToUploads = `src/${exports.uploadsFolder}`;
+exports.avatarFormFieldName = 'avatar';
 //# sourceMappingURL=config.js.map

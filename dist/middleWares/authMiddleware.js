@@ -17,7 +17,12 @@ const authMiddleware = (req, res, next) => {
         if (!token)
             return res.status(401).json({ message: 'The user isnt authorized' });
         const decodedData = jsonwebtoken_1.default.verify(token, config_1.JWT_ACCESS_SECRET);
-        req.data = decodedData;
+        if (req.data) {
+            req.data = Object.assign(Object.assign({}, req.data), decodedData);
+        }
+        else {
+            req.data = decodedData;
+        }
         next();
     }
     catch (e) {

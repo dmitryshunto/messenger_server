@@ -6,32 +6,10 @@ import { UserAuthorizationData, UserRegistrationData } from "../types/users"
 import { BaseResponse } from "../types/common"
 import { UserDtoType } from "../dto/userDto"
 import multer from 'multer'
-import fs from 'fs'
-import { getPathToUserFolder, getUserAvatarUrl } from "../functions/commonFunctions"
-import path from 'path'
+import { createStorage } from './../functions/multer';
+import { avatarFormFieldName } from '../config'
 
-const storage = multer.diskStorage({
-    destination: (req: CreateUserRequest, file, next) => {
-        const login = req.body.login
-        if (login) {
-            const userFolderPath = getPathToUserFolder(login)
-            if (!fs.existsSync(userFolderPath)) {
-                fs.mkdirSync(userFolderPath);
-            }
-            next(null, userFolderPath)
-        } else {
-            next(new Error('Invalid user login!'), null)
-        }
-    },
-    filename: (req: CreateUserRequest, file, next) => {
-        const login = req.body.login
-        const fileName = Date.now() + path.extname(file.originalname)
-        req.data = {
-            photoUrl: getUserAvatarUrl(login, fileName)
-        }
-        next(null, fileName)
-    }
-})
+const storage = createStorage()
 
 const upload = multer({ 
     storage, 
@@ -44,7 +22,7 @@ const userHandler = (router: typeof Router) => {
     const routes = router()
     routes.post<string, {}, any, UserRegistrationData>('/create',
         [
-            upload.single('avatar'),
+            upload.single(avatarFormFieldName),
             body(['login', 'firstName', 'lastName', 'email'], 'Field cannot be empty').notEmpty(),
             body('email', 'Incorrect email').isEmail(),
             body('password', 'The password must contain at least one number character, one lowercase letter, one uppercase letter, and must be more than 8 characters')

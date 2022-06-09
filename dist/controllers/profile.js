@@ -15,8 +15,25 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const ProfileService_1 = __importDefault(require("../services/ProfileService"));
 const activationMiddleware_1 = require("../middlewares/activationMiddleware");
 const authMiddleware_1 = require("../middlewares/authMiddleware");
+const multer_1 = __importDefault(require("multer"));
+const multer_2 = require("../functions/multer");
+const config_1 = require("../config");
+const storage = (0, multer_2.createStorage)();
+const upload = (0, multer_1.default)({
+    storage,
+    limits: {
+        fileSize: 1 * 1024 * 1024
+    }
+});
 const profileHandler = (router) => {
     const routes = router();
+    routes.put('/updatePhoto', [
+        authMiddleware_1.authMiddleware,
+        activationMiddleware_1.activationMiddleware,
+        upload.single(config_1.avatarFormFieldName),
+    ], (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        yield ProfileService_1.default.updateProfilePhoto(req, res);
+    }));
     routes.get('/myProfile', [authMiddleware_1.authMiddleware], (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         yield ProfileService_1.default.getMyProfile(req, res);
     }));

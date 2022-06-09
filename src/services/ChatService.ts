@@ -1,16 +1,15 @@
 import { MESSAGE_PORION_SIZE, serverError, tableNames } from "../config";
 import { BaseResponse } from "../types/common";
-import { CreateChatRequest, CreatePrivateChatPageRequest, EmptyRequest, GetMessagesRequest, GetUserChatsRequest } from "../types/requests";
+import { CreateChatRequest, CreatePrivateChatPageRequest, EmptyRequest, GetMessagesRequest } from "../types/requests";
 import { BaseService } from "./BaseService";
 import { Response } from 'express'
 import { ResultSetHeader, RowDataPacket } from "mysql2";
 import { UserData } from "../types/users";
 import { getArrayUniqueElements, getChatNameFromUserLogins } from '../functions/commonFunctions';
-import { BaseMessageData, ChatData, ChatMember, ChatNewMessageInfo, ChatType, GetMessagesResponse, MembersData, MessageType, StartingPrivateChatInfo } from "../types/chats";
+import { BaseMessageData, ChatData, ChatMember, ChatType, GetMessagesResponse, MembersData, MessageType, StartingPrivateChatInfo } from "../types/chats";
 import { TokenPayload } from "../types/tokens";
 import messageSevice from "./MessagesService";
 import webSocketService from '../index'
-import { MessageData } from "../types/webSockets";
 
 class ChatSevice extends BaseService {
 
@@ -76,12 +75,13 @@ class ChatSevice extends BaseService {
         }
     }
 
-    async getChats(req: GetUserChatsRequest, res: Response<BaseResponse<ChatData[]>>) {
+    async getChats(req: EmptyRequest, res: Response<BaseResponse<ChatData[]>>) {
         try {
             const tokenPayload = req.data as TokenPayload
             const { userId } = tokenPayload
             const connection = await this._createConnection()
-            const [chats] = await connection.execute<ChatType[]>(`SELECT ${tableNames['chat']}.id, name FROM ${tableNames['chatMembers']} JOIN ${tableNames['chat']} ON chatId = ${tableNames['chat']}.id WHERE memberId = ?`, [userId])
+            const [chats] = await connection.execute<ChatType[]>(`SELECT ${tableNames['chat']}.id, name FROM ${tableNames['chatMembers']} 
+                                                                  JOIN ${tableNames['chat']} ON chatId = ${tableNames['chat']}.id WHERE memberId = ?`, [userId])
 
             const [user] = await this.findItems<UserData>(tableNames['user'], 'id', userId)
             let userLogin = user.login
@@ -89,22 +89,24 @@ class ChatSevice extends BaseService {
             const chatsInfo: ChatData[] = []
             for (let chat of chats) {
                 let name: string
+                const [members] = await connection.execute<LoginAndPhoto[]>(`SELECT ${tableNames['user']}.login, photoUrl FROM ${tableNames['chatMembers']} JOIN ${tableNames['user']}
+                                                                        ON memberId = ${tableNames['user']}.id WHERE chatId = ?`, [chat.id])    
+                let chatPhotoUrl = members.find(data => data.login !== userLogin)?.photoUrl
                 if (!chat.name) {
-                    const [members] = await connection.execute<Login[]>(`SELECT ${tableNames['user']}.login FROM ${tableNames['chatMembers']} JOIN ${tableNames['user']}
-                                                                        ON memberId = ${tableNames['user']}.id WHERE chatId = ?`, [chat.id])
                     const logins = members.map(member => member.login)
                     name = getChatNameFromUserLogins(logins, userLogin)
                 } else {
                     name = chat.name
                 }
+                
                 const newMessages = await this.getUserChatNewMessagesNumber(chat.id, userId)
-                chatsInfo.push({ id: chat.id, name, newMessages } as ChatData)
+                chatsInfo.push({ id: chat.id, name, newMessages, chatPhotoUrl: chatPhotoUrl || null} as ChatData)
             }
-
+            await connection.end()
             return res.json({ message: 'Ok', data: chatsInfo })
         } catch (e) {
             console.log(e)
-            return res.status(500).json({ message: 'Unexpected error!' })
+            return res.status(500).json({ message: serverError })
         }
     }
 
@@ -217,7 +219,10 @@ class ChatSevice extends BaseService {
     }
 }
 
-interface Login extends RowDataPacket { login: string }
+interface LoginAndPhoto extends RowDataPacket { 
+    login: string
+    photoUrl: string | null
+}
 interface ChatId extends RowDataPacket { chatId: number }
 interface NewMessage extends RowDataPacket { newMessages: number }
 

@@ -23,6 +23,7 @@ export interface ChatType extends RowDataPacket {
 
 export interface ChatData extends ChatType {
     newMessages: number | null
+    chatPhotoUrl: string | null
 } 
 
 export interface ChatMember extends RowDataPacket {

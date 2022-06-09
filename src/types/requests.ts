@@ -2,12 +2,16 @@ import { BaseResponse, RequestType } from "./common"
 import {JwtPayload} from 'jsonwebtoken'
 import { UserAuthorizationData, UserRegistrationData } from "./users"
 import { Request } from "express"
+import {TokenPayload} from '../types/tokens'
 
 type UserAvatarURL = {
     photoUrl?: string
 }
-
 export type CreateUserRequest = RequestType<any, UserRegistrationData, {}, UserAvatarURL>
+
+export type UpdatePhotoData = TokenPayload & UserAvatarURL
+
+export type UpdatePhotoRequest = RequestType<{}, {}, {}, UpdatePhotoData>
 
 export type AuthorizeUserRequest = RequestType<any, UserAuthorizationData, {}, string | JwtPayload>
 
@@ -34,8 +38,6 @@ export type CreateChatParams = {
 }
 
 export type CreateChatRequest = RequestType<any, CreateChatParams, {}, string | JwtPayload>
-
-export type GetUserChatsRequest = RequestType<any, any, {}, string | JwtPayload>
 
 export type GetMessagesRequest = RequestType<any, {oldestMessageId?: number}, {}, string | JwtPayload, {chatId: number}>
 

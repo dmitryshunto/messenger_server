@@ -1,22 +1,36 @@
 import { UIUserDataDTO } from "../dto/userDto";
 import { BaseResponse } from "../types/common";
-import { EmptyRequest, GetUseProfilerRequest, GetUsersRequest } from "../types/requests";
-import { BaseService } from "./BaseService";
+import { EmptyRequest, GetUseProfilerRequest, GetUsersRequest, UpdatePhotoRequest } from "../types/requests";
+import { BaseService } from "./BaseService"
 import { Response } from 'express'
-import { tableNames } from "../config";
-import { UIUserData, UserData } from "../types/users";
-import { TokenPayload } from "../types/tokens";
-import chatService from "./ChatService";
+import { serverError, tableNames } from "../config"
+import { UIUserData, UserData } from "../types/users"
+import { TokenPayload } from "../types/tokens"
+import chatService from "./ChatService"
+import { PhotoUrl } from "../types/profile";
 
 class ProfileService extends BaseService {
     
+    async updateProfilePhoto(req: UpdatePhotoRequest, res: Response<BaseResponse<PhotoUrl>>) {
+        try {
+            const {photoUrl, userId} = req.data
+            const connection = await this._createConnection()
+            await connection.query(`UPDATE ${tableNames['user']} SET ? WHERE id = ?`, [{photoUrl}, userId])
+            return res.json({message: 'Ok!', data: {
+                photoUrl 
+            }})
+        } catch(e) {
+            return res.status(500).json({message: serverError})
+        }
+    }
+
     async getMyProfile(req: EmptyRequest, res: Response<BaseResponse<UIUserData>>) {
         try {
             const tokenPayload = req.data as TokenPayload
             let [user] = await this.findItems<UserData>(tableNames['user'], 'login', tokenPayload.login)
             return res.status(200).json({message: 'Ok', data: (new UIUserDataDTO(user)).user})
         } catch(e) {
-            return res.status(400).json({message: 'Cannot find the user!'})
+            return res.status(500).json({message: serverError})
         }
     }
     

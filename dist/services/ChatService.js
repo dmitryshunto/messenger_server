@@ -71,20 +71,23 @@ class ChatSevice extends BaseService_1.BaseService {
         });
     }
     getChats(req, res) {
+        var _a;
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const tokenPayload = req.data;
                 const { userId } = tokenPayload;
                 const connection = yield this._createConnection();
-                const [chats] = yield connection.execute(`SELECT ${config_1.tableNames['chat']}.id, name FROM ${config_1.tableNames['chatMembers']} JOIN ${config_1.tableNames['chat']} ON chatId = ${config_1.tableNames['chat']}.id WHERE memberId = ?`, [userId]);
+                const [chats] = yield connection.execute(`SELECT ${config_1.tableNames['chat']}.id, name FROM ${config_1.tableNames['chatMembers']} 
+                                                                  JOIN ${config_1.tableNames['chat']} ON chatId = ${config_1.tableNames['chat']}.id WHERE memberId = ?`, [userId]);
                 const [user] = yield this.findItems(config_1.tableNames['user'], 'id', userId);
                 let userLogin = user.login;
                 const chatsInfo = [];
                 for (let chat of chats) {
                     let name;
-                    if (!chat.name) {
-                        const [members] = yield connection.execute(`SELECT ${config_1.tableNames['user']}.login FROM ${config_1.tableNames['chatMembers']} JOIN ${config_1.tableNames['user']}
+                    const [members] = yield connection.execute(`SELECT ${config_1.tableNames['user']}.login, photoUrl FROM ${config_1.tableNames['chatMembers']} JOIN ${config_1.tableNames['user']}
                                                                         ON memberId = ${config_1.tableNames['user']}.id WHERE chatId = ?`, [chat.id]);
+                    let chatPhotoUrl = (_a = members.find(data => data.login !== userLogin)) === null || _a === void 0 ? void 0 : _a.photoUrl;
+                    if (!chat.name) {
                         const logins = members.map(member => member.login);
                         name = (0, commonFunctions_1.getChatNameFromUserLogins)(logins, userLogin);
                     }
@@ -92,13 +95,14 @@ class ChatSevice extends BaseService_1.BaseService {
                         name = chat.name;
                     }
                     const newMessages = yield this.getUserChatNewMessagesNumber(chat.id, userId);
-                    chatsInfo.push({ id: chat.id, name, newMessages });
+                    chatsInfo.push({ id: chat.id, name, newMessages, chatPhotoUrl: chatPhotoUrl || null });
                 }
+                yield connection.end();
                 return res.json({ message: 'Ok', data: chatsInfo });
             }
             catch (e) {
                 console.log(e);
-                return res.status(500).json({ message: 'Unexpected error!' });
+                return res.status(500).json({ message: config_1.serverError });
             }
         });
     }

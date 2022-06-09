@@ -17,6 +17,21 @@ const BaseService_1 = require("./BaseService");
 const config_1 = require("../config");
 const ChatService_1 = __importDefault(require("./ChatService"));
 class ProfileService extends BaseService_1.BaseService {
+    updateProfilePhoto(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { photoUrl, userId } = req.data;
+                const connection = yield this._createConnection();
+                yield connection.query(`UPDATE ${config_1.tableNames['user']} SET ? WHERE id = ?`, [{ photoUrl }, userId]);
+                return res.json({ message: 'Ok!', data: {
+                        photoUrl
+                    } });
+            }
+            catch (e) {
+                return res.status(500).json({ message: config_1.serverError });
+            }
+        });
+    }
     getMyProfile(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -25,7 +40,7 @@ class ProfileService extends BaseService_1.BaseService {
                 return res.status(200).json({ message: 'Ok', data: (new userDto_1.UIUserDataDTO(user)).user });
             }
             catch (e) {
-                return res.status(400).json({ message: 'Cannot find the user!' });
+                return res.status(500).json({ message: config_1.serverError });
             }
         });
     }

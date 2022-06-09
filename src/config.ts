@@ -39,3 +39,5 @@ export const MESSAGE_PORION_SIZE = 3
 export const uploadsFolder = 'uploads'
 
 export const pathToUploads = `src/${uploadsFolder}`
+
+export const avatarFormFieldName = 'avatar'

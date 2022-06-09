@@ -20,7 +20,7 @@ export class WebSocketService {
                 userId: socket.data.userId,
             })
             socket.on('disconnect', () => {
-                socket.broadcast.emit<EmitEventTypes>('userDisconnected', socket.data.userId)
+                io.emit<EmitEventTypes>('userDisconnected', socket.data.userId)
             })
             socket.on<EmitEventTypes>('message', async (baseMessageData: BaseMessageData) => {
                 const messageId = await messageService.insertMessageToDB(baseMessageData)

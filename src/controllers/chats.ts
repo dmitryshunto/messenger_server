@@ -2,7 +2,7 @@ import { Router, Request, Response } from "express"
 import { activationMiddleware } from "../middlewares/activationMiddleware"
 import { authMiddleware } from "../middlewares/authMiddleware"
 import chatService from "../services/ChatService"
-import { CreatePrivateChatPageRequest, EmptyRequest, GetMessagesRequest } from "../types/requests"
+import { CreatePrivateChatPageRequest, GetMessagesRequest } from "../types/requests"
 
 const chatHandler = (router: typeof Router) => {
     const routes = router()

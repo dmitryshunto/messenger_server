@@ -29,7 +29,7 @@ class WebSocketService {
                 userId: socket.data.userId,
             });
             socket.on('disconnect', () => {
-                socket.broadcast.emit('userDisconnected', socket.data.userId);
+                io.emit('userDisconnected', socket.data.userId);
             });
             socket.on('message', (baseMessageData) => __awaiter(this, void 0, void 0, function* () {
                 const messageId = yield MessagesService_1.default.insertMessageToDB(baseMessageData);
