@@ -28,7 +28,7 @@ exports.tableNames = {
     token: 'token',
     chatMembers: 'chat_members'
 };
-exports.MESSAGE_PORION_SIZE = 3;
+exports.MESSAGE_PORION_SIZE = 50;
 exports.uploadsFolder = 'uploads';
 exports.pathToUploads = `src/${exports.uploadsFolder}`;
 exports.avatarFormFieldName = 'avatar';

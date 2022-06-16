@@ -71,7 +71,7 @@ class ChatSevice extends BaseService_1.BaseService {
         });
     }
     getChats(req, res) {
-        var _a;
+        var _a, _b;
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const tokenPayload = req.data;
@@ -82,11 +82,14 @@ class ChatSevice extends BaseService_1.BaseService {
                 const [user] = yield this.findItems(config_1.tableNames['user'], 'id', userId);
                 let userLogin = user.login;
                 const chatsInfo = [];
+                let companionId = null;
                 for (let chat of chats) {
                     let name;
-                    const [members] = yield connection.execute(`SELECT ${config_1.tableNames['user']}.login, photoUrl FROM ${config_1.tableNames['chatMembers']} JOIN ${config_1.tableNames['user']}
+                    const [members] = yield connection.execute(`SELECT ${config_1.tableNames['user']}.login, ${config_1.tableNames['user']}.id, photoUrl FROM ${config_1.tableNames['chatMembers']} JOIN ${config_1.tableNames['user']}
                                                                         ON memberId = ${config_1.tableNames['user']}.id WHERE chatId = ?`, [chat.id]);
                     let chatPhotoUrl = (_a = members.find(data => data.login !== userLogin)) === null || _a === void 0 ? void 0 : _a.photoUrl;
+                    if (members.length === 2)
+                        companionId = (_b = members.find(data => data.login !== userLogin)) === null || _b === void 0 ? void 0 : _b.id;
                     if (!chat.name) {
                         const logins = members.map(member => member.login);
                         name = (0, commonFunctions_1.getChatNameFromUserLogins)(logins, userLogin);
@@ -95,7 +98,7 @@ class ChatSevice extends BaseService_1.BaseService {
                         name = chat.name;
                     }
                     const newMessages = yield this.getUserChatNewMessagesNumber(chat.id, userId);
-                    chatsInfo.push({ id: chat.id, name, newMessages, chatPhotoUrl: chatPhotoUrl || null });
+                    chatsInfo.push({ id: chat.id, name, newMessages, chatPhotoUrl: chatPhotoUrl || null, companionId });
                 }
                 yield connection.end();
                 return res.json({ message: 'Ok', data: chatsInfo });
@@ -113,17 +116,20 @@ class ChatSevice extends BaseService_1.BaseService {
         });
     }
     getMesages(req, res) {
+        var _a, _b, _c;
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const { userId } = req.data;
                 const chatId = req.params.chatId;
                 const { oldestMessageId } = req.body;
-                const chatMembers = yield this.getChatMembers(chatId);
-                const isUserInChatMembers = chatMembers.find((memberId) => memberId === userId);
+                const chatMembersIds = yield this.getChatMembers(chatId);
+                const isUserInChatMembers = chatMembersIds.some((memberId) => memberId === userId);
                 if (!isUserInChatMembers)
                     return res.status(403).json({ message: 'You cannot read this chat!' });
-                // const messages = await this.findItems<MessageType>(tableNames['message'], 'chatId', chatId)
                 const connection = yield this._createConnection();
+                const [result] = yield connection.execute(`SELECT lastReadMessageId FROM ${config_1.tableNames['chatMembers']} 
+                                                                                                    WHERE memberId = ? AND chatId = ?`, [userId, chatId]);
+                const userLastReadMessageId = (_a = result[0]) === null || _a === void 0 ? void 0 : _a.lastReadMessageId;
                 let query;
                 let params = [chatId];
                 if (oldestMessageId) {
@@ -134,16 +140,26 @@ class ChatSevice extends BaseService_1.BaseService {
                     query = `SELECT * FROM (SELECT * FROM ${config_1.tableNames['message']} WHERE chatId = ? ORDER BY id DESC LIMIT ?) sub ORDER BY id ASC`;
                     params = [...params, config_1.MESSAGE_PORION_SIZE];
                 }
-                const [messages] = yield connection.execute(query, params);
+                let [messages] = yield connection.execute(query, params);
+                if (((_b = messages[0]) === null || _b === void 0 ? void 0 : _b.id) > userLastReadMessageId) {
+                    const [additionalMessages] = yield connection.execute(`SELECT * FROM ${config_1.tableNames['message']} WHERE chatId = ? AND id > ? AND id < ?`, [chatId, userLastReadMessageId, messages[0].id]);
+                    if (additionalMessages.length)
+                        messages = [...additionalMessages, ...messages];
+                }
                 const membersData = [];
-                for (let memberId of chatMembers) {
+                for (let memberId of chatMembersIds) {
                     const [memberData] = yield connection.execute(`SELECT memberId as id, lastReadMessageId, login, photoUrl FROM ${config_1.tableNames['chatMembers']}
                                                                               JOIN ${config_1.tableNames['user']} ON memberId = ${config_1.tableNames['user']}.id  
                                                                               WHERE memberId = ? AND chatId = ?`, [memberId, chatId]);
                     membersData.push(Object.assign({}, memberData[0]));
                 }
+                const [ress] = yield connection.execute(`SELECT min(id) as firstMessageId FROM ${config_1.tableNames['message']}
+                                                                        WHERE chatId = ?`, [chatId]);
+                let isAllMessages = false;
+                if (((_c = messages[0]) === null || _c === void 0 ? void 0 : _c.id) === ress[0].firstMessageId)
+                    isAllMessages = true;
                 yield connection.end();
-                return res.json({ message: 'Ok', data: { messages, membersData } });
+                return res.json({ message: 'Ok', data: { messages, membersData, isAllMessages } });
             }
             catch (e) {
                 console.log(e);

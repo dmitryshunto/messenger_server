@@ -8,12 +8,7 @@ export interface BaseMessageData  extends RowDataPacket {
 
 export interface MessageType extends BaseMessageData {
     id: number
-    createdAT: string
-}
-
-export interface UIMessageData extends MessageType {
-    isSending: boolean
-    sendingSuccess: null | boolean
+    createdAt: number
 }
  
 export interface ChatType extends RowDataPacket {
@@ -24,6 +19,7 @@ export interface ChatType extends RowDataPacket {
 export interface ChatData extends ChatType {
     newMessages: number | null
     chatPhotoUrl: string | null
+    companionId?: number
 } 
 
 export interface ChatMember extends RowDataPacket {
@@ -47,6 +43,7 @@ export interface MembersData extends RowDataPacket {
 export type GetMessagesResponse = {
     messages: MessageType[]
     membersData: MembersData[]
+    isAllMessages: boolean
 }
 
 export type ChatNewMessageInfo = {

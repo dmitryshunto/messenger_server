@@ -87,11 +87,13 @@ class ChatSevice extends BaseService {
             let userLogin = user.login
 
             const chatsInfo: ChatData[] = []
+            let companionId = null
             for (let chat of chats) {
                 let name: string
-                const [members] = await connection.execute<LoginAndPhoto[]>(`SELECT ${tableNames['user']}.login, photoUrl FROM ${tableNames['chatMembers']} JOIN ${tableNames['user']}
+                const [members] = await connection.execute<ChatMemeberData[]>(`SELECT ${tableNames['user']}.login, ${tableNames['user']}.id, photoUrl FROM ${tableNames['chatMembers']} JOIN ${tableNames['user']}
                                                                         ON memberId = ${tableNames['user']}.id WHERE chatId = ?`, [chat.id])    
                 let chatPhotoUrl = members.find(data => data.login !== userLogin)?.photoUrl
+                if(members.length === 2) companionId = members.find(data => data.login !== userLogin)?.id
                 if (!chat.name) {
                     const logins = members.map(member => member.login)
                     name = getChatNameFromUserLogins(logins, userLogin)
@@ -100,7 +102,7 @@ class ChatSevice extends BaseService {
                 }
                 
                 const newMessages = await this.getUserChatNewMessagesNumber(chat.id, userId)
-                chatsInfo.push({ id: chat.id, name, newMessages, chatPhotoUrl: chatPhotoUrl || null} as ChatData)
+                chatsInfo.push({ id: chat.id, name, newMessages, chatPhotoUrl: chatPhotoUrl || null, companionId} as ChatData)
             }
             await connection.end()
             return res.json({ message: 'Ok', data: chatsInfo })
@@ -120,11 +122,18 @@ class ChatSevice extends BaseService {
             const { userId } = req.data as TokenPayload
             const chatId = req.params.chatId
             const { oldestMessageId } = req.body
-            const chatMembers = await this.getChatMembers(chatId)
-            const isUserInChatMembers = chatMembers.find((memberId) => memberId === userId)
+            
+            const chatMembersIds = await this.getChatMembers(chatId)
+            const isUserInChatMembers = chatMembersIds.some((memberId) => memberId === userId)
             if (!isUserInChatMembers) return res.status(403).json({ message: 'You cannot read this chat!' })
-            // const messages = await this.findItems<MessageType>(tableNames['message'], 'chatId', chatId)
+            
             const connection = await this._createConnection()
+
+            const [result] = await connection.execute<LastReadMessageId[]>(`SELECT lastReadMessageId FROM ${tableNames['chatMembers']} 
+                                                                                                    WHERE memberId = ? AND chatId = ?`, [userId, chatId])
+
+            const userLastReadMessageId = result[0]?.lastReadMessageId
+
             let query: string
             let params = [chatId]
             if (oldestMessageId) {
@@ -134,16 +143,27 @@ class ChatSevice extends BaseService {
                 query = `SELECT * FROM (SELECT * FROM ${tableNames['message']} WHERE chatId = ? ORDER BY id DESC LIMIT ?) sub ORDER BY id ASC`
                 params = [...params, MESSAGE_PORION_SIZE]
             }
-            const [messages] = await connection.execute<MessageType[]>(query, params)
+            let [messages] = await connection.execute<MessageType[]>(query, params)
+            if(messages[0]?.id > userLastReadMessageId) {
+                const [additionalMessages] = await connection.execute<MessageType[]>(
+                    `SELECT * FROM ${tableNames['message']} WHERE chatId = ? AND id > ? AND id < ?`,
+                    [chatId, userLastReadMessageId, messages[0].id] 
+                )
+                if(additionalMessages.length) messages = [...additionalMessages, ...messages]
+            }
             const membersData: MembersData[] = []
-            for (let memberId of chatMembers) {
+            for (let memberId of chatMembersIds) {
                 const [memberData] = await connection.execute<MembersData[]>(`SELECT memberId as id, lastReadMessageId, login, photoUrl FROM ${tableNames['chatMembers']}
                                                                               JOIN ${tableNames['user']} ON memberId = ${tableNames['user']}.id  
                                                                               WHERE memberId = ? AND chatId = ?`, [memberId, chatId])
                 membersData.push({ ...memberData[0] })
             }
+            const [ress] = await connection.execute<FirstdMessageId[]>(`SELECT min(id) as firstMessageId FROM ${tableNames['message']}
+                                                                        WHERE chatId = ?`, [chatId])
+            let isAllMessages = false
+            if(messages[0]?.id === ress[0].firstMessageId) isAllMessages = true
             await connection.end()
-            return res.json({ message: 'Ok', data: { messages, membersData } })
+            return res.json({ message: 'Ok', data: { messages, membersData, isAllMessages } })
         } catch (e) {
             console.log(e)
             return res.status(500).json({ message: serverError })
@@ -219,10 +239,20 @@ class ChatSevice extends BaseService {
     }
 }
 
-interface LoginAndPhoto extends RowDataPacket { 
+interface ChatMemeberData extends RowDataPacket { 
+    id: number
     login: string
     photoUrl: string | null
 }
+
+interface LastReadMessageId extends RowDataPacket {
+    lastReadMessageId: number | null
+}
+
+interface FirstdMessageId extends RowDataPacket {
+    firstMessageId: number
+}
+
 interface ChatId extends RowDataPacket { chatId: number }
 interface NewMessage extends RowDataPacket { newMessages: number }
 

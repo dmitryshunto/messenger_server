@@ -34,7 +34,7 @@ export const tableNames = {
     chatMembers: 'chat_members'
 }
 
-export const MESSAGE_PORION_SIZE = 3
+export const MESSAGE_PORION_SIZE = 50
 
 export const uploadsFolder = 'uploads'
 
