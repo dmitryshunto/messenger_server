@@ -53,7 +53,7 @@ class AuthService extends BaseService_1.BaseService {
                 };
                 yield connection.query(`INSERT INTO ${config_1.tableNames['user']} SET ?`, userRegistartionData);
                 let [user] = yield this.findItems(config_1.tableNames['user'], 'login', login);
-                yield this.mailService.sendActiovationMessage(email, `${config_1.SERVER_URL}users/activate/${activationLink}`);
+                yield this.mailService.sendActiovationMessage(email, `${config_1.apiDomain}users/activate/${activationLink}`);
                 const tokens = this.tokenService.generateTokens({ login, userId: user.id });
                 yield this.tokenService.saveToken(user.id, tokens.refreshToken);
                 res.cookie(config_1.refreshTokenCookieName, tokens.refreshToken, { maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true });

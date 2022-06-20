@@ -1,4 +1,4 @@
-import { CLIENT_URL, refreshTokenCookieName, serverError, SERVER_URL, tableNames } from "../config"
+import { apiDomain, CLIENT_URL, refreshTokenCookieName, serverError, SERVER_URL, tableNames } from "../config"
 import { Response, Request } from "express"
 import { ActivateUserRequest, AuthorizeUserRequest, CreateUserRequest } from "../types/requests"
 import bcrypt from 'bcrypt'
@@ -49,7 +49,7 @@ class AuthService extends BaseService {
 
             let [user] = await this.findItems<UserData>(tableNames['user'], 'login', login)
 
-            await this.mailService.sendActiovationMessage(email, `${SERVER_URL}users/activate/${activationLink}`)
+            await this.mailService.sendActiovationMessage(email, `${apiDomain}users/activate/${activationLink}`)
 
             const tokens = this.tokenService.generateTokens({ login, userId: user.id })
             await this.tokenService.saveToken(user.id, tokens.refreshToken)
