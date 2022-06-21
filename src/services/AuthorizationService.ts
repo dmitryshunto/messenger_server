@@ -1,4 +1,4 @@
-import { apiDomain, clientDomain, CLIENT_URL, refreshTokenCookieName, serverError, SERVER_URL, tableNames } from "../config"
+import { apiDomain, clientDomain, refreshTokenCookieName, serverError, tableNames } from "../config"
 import { Response, Request } from "express"
 import { ActivateUserRequest, AuthorizeUserRequest, CreateUserRequest } from "../types/requests"
 import bcrypt from 'bcrypt'

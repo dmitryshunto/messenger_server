@@ -1,5 +1,5 @@
 import path from 'path'
-import { pathToUploads, SERVER_URL, uploadsFolder } from '../config';
+import { pathToUploads, SERVER_URL, uploadsFolder, clientDomain } from '../config';
 function onlyUnique<D>(value: D, index: number, array: D[]) {
     return array.indexOf(value) === index;
 }
