@@ -106,7 +106,7 @@ class AuthService extends BaseService_1.BaseService {
                 let userId = users[users.length - 1].id;
                 yield connection.query(`UPDATE ${config_1.tableNames['user']} SET isActivated = ? WHERE id = ?`, [true, userId]);
                 yield connection.end();
-                return res.redirect(config_1.CLIENT_URL);
+                return res.redirect(config_1.clientDomain);
             }
             catch (e) {
                 console.log(e);

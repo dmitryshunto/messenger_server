@@ -1,4 +1,4 @@
-import { apiDomain, CLIENT_URL, refreshTokenCookieName, serverError, SERVER_URL, tableNames } from "../config"
+import { apiDomain, clientDomain, CLIENT_URL, refreshTokenCookieName, serverError, SERVER_URL, tableNames } from "../config"
 import { Response, Request } from "express"
 import { ActivateUserRequest, AuthorizeUserRequest, CreateUserRequest } from "../types/requests"
 import bcrypt from 'bcrypt'
@@ -98,7 +98,7 @@ class AuthService extends BaseService {
             let userId = users[users.length - 1].id
             await connection.query(`UPDATE ${tableNames['user']} SET isActivated = ? WHERE id = ?`, [true, userId])
             await connection.end()
-            return res.redirect(CLIENT_URL)
+            return res.redirect(clientDomain)
         } catch (e) {
             console.log(e)
             return res.status(400).json({ message: 'Activation error!' })
