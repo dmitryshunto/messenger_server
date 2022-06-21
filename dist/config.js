@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.avatarFormFieldName = exports.pathToUploads = exports.uploadsFolder = exports.MESSAGE_PORION_SIZE = exports.tableNames = exports.serverError = exports.notAuthMsg = exports.refreshTokenCookieName = exports.apiDomain = exports.CLIENT_URL = exports.SERVER_URL = exports.APP_PASSWORD = exports.SMTP_PASSWORD = exports.SMTP_USER = exports.SMTP_PORT = exports.SMTP_HOST = exports.JWT_REFRESH_SECRET = exports.JWT_ACCESS_SECRET = exports.port = exports.database = exports.HOST_PORT = exports.host = exports.password = exports.user = void 0;
+exports.avatarFormFieldName = exports.pathToUploads = exports.uploadsFolder = exports.MESSAGE_PORION_SIZE = exports.tableNames = exports.serverError = exports.notAuthMsg = exports.refreshTokenCookieName = exports.apiDomain = exports.clientDomain = exports.CLIENT_URL = exports.SERVER_URL = exports.APP_PASSWORD = exports.SMTP_PASSWORD = exports.SMTP_USER = exports.SMTP_PORT = exports.SMTP_HOST = exports.JWT_REFRESH_SECRET = exports.JWT_ACCESS_SECRET = exports.port = exports.database = exports.HOST_PORT = exports.host = exports.password = exports.user = void 0;
 exports.user = 'dmitry';
 exports.password = 'dmitry';
 exports.host = 'localhost';
@@ -17,7 +17,8 @@ exports.APP_PASSWORD = 'ralvofpgwpkiixrv';
 const CLIENT_HOST_PORT = 3003;
 exports.SERVER_URL = `http://${exports.host}:${exports.HOST_PORT}/`;
 exports.CLIENT_URL = `http://${exports.host}:${CLIENT_HOST_PORT}`;
-exports.apiDomain = exports.SERVER_URL; // `http://93.85.88.91/api/`
+exports.clientDomain = exports.CLIENT_URL; // `http://93.85.88.91/`
+exports.apiDomain = exports.SERVER_URL; // `${clientDomain}api/`
 exports.refreshTokenCookieName = 'refreshToken';
 exports.notAuthMsg = 'Authorization error!';
 exports.serverError = 'Server error!';

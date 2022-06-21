@@ -18,7 +18,9 @@ export const APP_PASSWORD = 'ralvofpgwpkiixrv'
 const CLIENT_HOST_PORT = 3003
 export const SERVER_URL = `http://${host}:${HOST_PORT}/`
 export const CLIENT_URL = `http://${host}:${CLIENT_HOST_PORT}`
-export const apiDomain = SERVER_URL // `http://93.85.88.91/api/`
+
+export const clientDomain = CLIENT_URL // `http://93.85.88.91/`
+export const apiDomain = SERVER_URL // `${clientDomain}api/`
 
 export const refreshTokenCookieName = 'refreshToken'
 
