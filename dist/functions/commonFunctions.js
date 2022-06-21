@@ -34,7 +34,7 @@ exports.getChatNameFromUserLogins = getChatNameFromUserLogins;
 const getPathToUserFolder = (login) => path_1.default.join(config_1.pathToUploads, login);
 exports.getPathToUserFolder = getPathToUserFolder;
 const getUserAvatarUrl = (login, fileName) => {
-    return `${config_1.SERVER_URL}${config_1.uploadsFolder}/${login}/${fileName}`;
+    return `${config_1.clientDomain}${config_1.uploadsFolder}/${login}/${fileName}`;
 };
 exports.getUserAvatarUrl = getUserAvatarUrl;
 //# sourceMappingURL=commonFunctions.js.map

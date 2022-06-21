@@ -27,5 +27,5 @@ export const getChatNameFromUserLogins = (logins: string[], userLogin: string) =
 export const getPathToUserFolder = (login: string) => path.join(pathToUploads, login)
 
 export const getUserAvatarUrl = (login: string, fileName: string) => {
-    return `${SERVER_URL}${uploadsFolder}/${login}/${fileName}`
+    return `${clientDomain}${uploadsFolder}/${login}/${fileName}`
 }
